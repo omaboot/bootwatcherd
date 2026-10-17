@@ -1,3 +1,14 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/header-dark.png">
+    <img alt="bootwatcherd: the monitor behind status.boot.watch" src=".github/assets/header-light.png" width="100%">
+  </picture>
+</p>
+
+<p align="center">
+  <a href="https://github.com/omaboot/bootwatcherd/tags"><img alt="Release" src="https://img.shields.io/github/v/tag/omaboot/bootwatcherd?label=release&sort=semver"></a>
+</p>
+
 # bootwatcherd
 
 boot.watch's monitor and status page, https://status.boot.watch. Every minute it checks
