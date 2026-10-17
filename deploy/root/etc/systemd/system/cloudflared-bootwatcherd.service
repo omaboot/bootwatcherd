@@ -1,0 +1,53 @@
+# Cloudflare Tunnel "bootwatcherd" (remotely managed): status.boot.watch to bootwatcherd on
+# 127.0.0.1:8471. Separate from doiomad's tunnel and cloudflared; metrics on 20251 so it never
+# competes with doiomad's cloudflared (20241). The token is a credential read from a file
+# (/etc/bootwatcherd/tunnel-token, written by deploy/cloudflare.sh), never in the environment.
+[Unit]
+Description=Cloudflare Tunnel for status.boot.watch
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/bootwatcherd/tunnel-token
+
+[Service]
+DynamicUser=yes
+LoadCredential=tunnel-token:/etc/bootwatcherd/tunnel-token
+ExecStart=/usr/bin/cloudflared --no-autoupdate tunnel --metrics 127.0.0.1:20251 run --token-file %d/tunnel-token
+Restart=always
+RestartSec=5
+
+# doiomad comes first
+MemoryHigh=72M
+MemoryMax=96M
+CPUQuota=20%
+CPUWeight=20
+IOWeight=20
+Nice=10
+TasksMax=64
+OOMScoreAdjust=500
+InaccessiblePaths=-/var/lib/doiomad -/etc/doiomad -/opt/doiomad -/etc/litestream.yml
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+UMask=0077
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateIPC=yes
+ProtectProc=invisible
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=multi-user.target

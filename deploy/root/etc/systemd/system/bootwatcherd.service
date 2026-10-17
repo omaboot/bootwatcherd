@@ -1,0 +1,56 @@
+# bootwatcherd: boot.watch's monitor and status page, a guest on doiomad's server. It yields to
+# doiomad: small fixed limits, a fifth of doiomad's CPU and I/O weight, first in line for the
+# OOM killer, and doiomad's files invisible to it.
+[Unit]
+Description=bootwatcherd: boot.watch's status page and monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/bootwatcherd
+Restart=on-failure
+RestartSec=5
+Environment=GOMEMLIMIT=40MiB
+
+DynamicUser=yes
+StateDirectory=bootwatcherd
+StateDirectoryMode=0700
+LoadCredential=pushover.env:/etc/bootwatcherd/pushover.env
+
+# doiomad comes first
+MemoryHigh=48M
+MemoryMax=64M
+CPUQuota=20%
+CPUWeight=20
+IOWeight=20
+Nice=10
+TasksMax=64
+OOMScoreAdjust=500
+InaccessiblePaths=-/var/lib/doiomad -/etc/doiomad -/opt/doiomad -/etc/litestream.yml
+
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+UMask=0077
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateIPC=yes
+ProtectProc=invisible
+ProcSubset=pid
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+
+[Install]
+WantedBy=multi-user.target

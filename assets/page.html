@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="60">
+<title>boot.watch status</title>
+<meta name="description" content="boot.watch status: {{.Headline}}">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/JetBrainsMono-Regular.woff2") format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-style:normal;font-weight:600;font-display:swap;src:url("/fonts/JetBrainsMono-SemiBold.woff2") format("woff2")}
+*,*::before,*::after{box-sizing:border-box}
+html{background:#0b0d10;color-scheme:dark}
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;background:#0b0d10;color:#dfe4e8;font-family:"JetBrains Mono",ui-monospace,monospace}
+a{color:#a493f7}a:hover{color:#c4b8ff}
+code,pre{font-family:inherit}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding-left:64px;padding-right:64px}
+header{border-bottom:1px solid #262c33}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px 24px;padding-top:22px;padding-bottom:22px}
+.brand{display:flex;align-items:center;gap:16px}
+.avatar{width:44px;height:44px;border-radius:6px;overflow:hidden;flex:none}
+.avatar svg,.wm svg{display:block}
+.wm svg{color:#dfe4e8}
+.tag{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#8a949c;border:1px solid #262c33;border-radius:4px;padding:3px 8px}
+nav{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:14px}
+nav a{color:#8a949c;text-decoration:none}
+nav a:hover{color:#c4b8ff}
+nav a.out{color:#a493f7}
+nav a.out:hover{color:#dfe4e8}
+main{flex:1;display:flex;flex-direction:column;gap:28px;padding-top:36px;padding-bottom:48px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px 24px;flex-wrap:wrap}
+.headline{display:flex;align-items:center;gap:16px}
+.headline svg{flex:none}
+h1{margin:0;font-size:30px;font-weight:600}
+.checked{font-size:14px;color:#8a949c}
+.panel{background:#13171c;border:1px solid #262c33;border-radius:10px}
+.panel-head{display:flex;justify-content:space-between;padding:14px 22px;border-bottom:1px solid #262c33;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8a949c}
+.row{display:grid;grid-template-columns:240px 1fr 110px;align-items:center;gap:24px;padding:18px 22px;border-bottom:1px solid #262c33}
+.row:last-child{border-bottom:0}
+.name{font-size:17px;font-weight:600}
+.what{font-size:13px;color:#8a949c}
+.bars{display:flex;gap:3px;height:30px}
+.bars div{flex:1;min-width:0;border-radius:2px;background:#262c33}
+.uptime{text-align:right;font-size:15px}
+.later .uptime{color:#8a949c}
+.c-teal{background:#4fa6ad!important}
+.c-amber{background:#e0a84f!important}
+.c-red{background:#ef6b6b!important}
+.c-grey{background:#262c33!important}
+.m-teal{fill:#8fe3e8}
+.m-amber{fill:#e0a84f}
+.m-red{fill:#ef6b6b}
+.m-grey{fill:#8a949c}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:12px 22px;flex-wrap:wrap;font-size:13px;color:#8a949c}
+.legend{display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center}
+.legend span{display:flex;align-items:center;gap:8px}
+.legend i{width:12px;height:12px;border-radius:2px;display:inline-block}
+footer{border-top:1px solid #262c33}
+footer .wrap{display:flex;justify-content:space-between;gap:8px 24px;flex-wrap:wrap;padding-top:20px;padding-bottom:20px;font-size:13px;color:#8a949c}
+@media (max-width:760px){
+.wrap{padding-left:16px;padding-right:16px}
+header .wrap{flex-wrap:wrap;padding-top:16px;padding-bottom:16px}
+.brand{gap:12px}
+.avatar,.avatar svg{width:36px;height:36px}
+.wm svg{width:165px;height:21px}
+.tag{font-size:11px;padding:2px 6px}
+main{padding-top:24px;gap:22px}
+h1{font-size:22px}
+.headline{gap:12px}
+.panel-head{padding:12px 14px}
+.row{grid-template-columns:1fr;gap:10px;padding:14px}
+.bars{gap:1px;height:28px}
+.bars div{border-radius:1px}
+.uptime{text-align:left}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="wrap">
+<div class="brand">
+<div class="avatar"><svg viewBox="0 0 22 22" width="44" height="44" shape-rendering="crispEdges" role="img" aria-label="bootwatchd"><rect width="22" height="22" fill="#0b0d10"/><path fill="#3a434d" d="M7 0h8v6h-8zM7 15h8v7h-8z"/><path fill="#0b0d10" d="M10 17h2v1h-2zM10 19h2v1h-2z"/><path fill="#4fa6ad" d="M5 6h12v1h-12zM4 7h1v7h-1zM17 7h1v7h-1zM5 14h12v1h-12z"/><path fill="#eef2f4" d="M8 8h3v1h-3zM13 8h3v1h-3zM8 9h3v1h-3zM13 9h3v1h-3z"/><path fill="#c98f3a" d="M18 9h2v2h-2z"/><path fill="#8fe3e8" d="M11 11h2v1h-2z"/></svg></div>
+<div class="wm"><svg viewBox="0 0 55 7" width="220" height="28" shape-rendering="crispEdges" role="img" aria-label="boot.watch"><path fill="currentColor" d="M0 0h1v1h-1zM19 0h1v1h-1zM39 0h1v1h-1zM50 0h1v1h-1zM0 1h1v1h-1zM19 1h1v1h-1zM39 1h1v1h-1zM50 1h1v1h-1zM0 2h4v1h-4zM7 2h3v1h-3zM13 2h3v1h-3zM18 2h4v1h-4zM26 2h1v1h-1zM30 2h1v1h-1zM33 2h3v1h-3zM38 2h4v1h-4zM45 2h3v1h-3zM50 2h4v1h-4zM0 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM10 3h1v1h-1zM12 3h1v1h-1zM16 3h1v1h-1zM19 3h1v1h-1zM26 3h1v1h-1zM30 3h1v1h-1zM36 3h1v1h-1zM39 3h1v1h-1zM44 3h1v1h-1zM50 3h1v1h-1zM54 3h1v1h-1zM0 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM16 4h1v1h-1zM19 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM30 4h1v1h-1zM33 4h4v1h-4zM39 4h1v1h-1zM44 4h1v1h-1zM50 4h1v1h-1zM54 4h1v1h-1zM0 5h1v1h-1zM4 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM16 5h1v1h-1zM19 5h1v1h-1zM22 5h1v1h-1zM26 5h1v1h-1zM28 5h1v1h-1zM30 5h1v1h-1zM32 5h1v1h-1zM36 5h1v1h-1zM39 5h1v1h-1zM42 5h1v1h-1zM44 5h1v1h-1zM48 5h1v1h-1zM50 5h1v1h-1zM54 5h1v1h-1zM0 6h4v1h-4zM7 6h3v1h-3zM13 6h3v1h-3zM20 6h2v1h-2zM27 6h1v1h-1zM29 6h1v1h-1zM33 6h4v1h-4zM40 6h2v1h-2zM45 6h3v1h-3zM50 6h1v1h-1zM54 6h1v1h-1z"/><path fill="#a493f7" d="M24 6h1v1h-1z"/></svg></div>
+<div class="tag">status</div>
+</div>
+<nav>
+<a class="out" href="https://omaboot.live/">OmaBoot.live<span aria-hidden="true"> ↗</span></a>
+<a href="https://omaboot.live/docs/#bootwatch">Protocol</a>
+</nav>
+</div>
+</header>
+<main class="wrap">
+<div class="top">
+<div class="headline">
+<svg viewBox="0 0 5 5" width="20" height="20" shape-rendering="crispEdges" aria-hidden="true"><path class="m-{{.Colour}}" d="M1 0h3v1h-3zM0 1h5v3h-5zM1 4h3v1h-3z"/></svg>
+<h1>{{.Headline}}</h1>
+</div>
+<div class="checked">Checked every minute · last check {{.LastCheck}}</div>
+</div>
+<section class="panel" aria-label="Endpoints">
+<div class="panel-head"><span>Endpoint · last 60 days</span></div>
+{{- range .Rows}}
+<div class="row">
+<div><div class="name">{{.Path}}</div><div class="what">{{.What}}</div></div>
+<div class="bars">{{range .Bars}}<div class="c-{{.Colour}}" title="{{.Title}}"></div>{{end}}</div>
+<div class="uptime">{{.Uptime}}</div>
+</div>
+{{- end}}
+<div class="row later">
+<div><div class="name">phone relay</div><div class="what">planned</div></div>
+<div class="bars">{{range .Relay}}<div></div>{{end}}</div>
+<div class="uptime">not yet</div>
+</div>
+</section>
+<div class="foot">
+<div class="legend">
+<span><i class="c-teal"></i>answering</span>
+<span><i class="c-amber"></i>slow or partly down</span>
+<span><i class="c-red"></i>not answering</span>
+<span><i class="c-grey"></i>no data</span>
+</div>
+{{- if .Budget}}
+<div>Today{{with .Budget.Since}} since {{.}}{{end}}: {{.Budget.Day}} of the {{.Budget.Daily}} daily budget</div>
+{{- end}}
+</div>
+</main>
+<footer>
+<div class="wrap">
+<span>bootwatchd keeps no request log and no addresses on disk.</span>
+<span>Part of <a href="https://omaboot.live/">OmaBoot? Live</a></span>
+</div>
+</footer>
+</body>
+</html>
