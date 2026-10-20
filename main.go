@@ -195,6 +195,11 @@ func (w *watcher) alerts(ctx context.Context, c Check, at time.Time) {
 	if err := w.st.setAlertStates(states, blind); err != nil {
 		log.Printf("bootwatcherd: alert state: %v", err)
 	}
+	if b, m := bugStep(w.st.bugAlert(), c.Health, at); m == nil || w.deliver(ctx, *m) {
+		if err := w.st.setBugAlert(b); err != nil {
+			log.Printf("bootwatcherd: bug alert state: %v", err)
+		}
+	}
 }
 
 // deliver sends m, telling whether it went out.

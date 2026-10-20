@@ -48,6 +48,12 @@ type Health struct {
 	DailyBytes    int64     `json:"daily_bytes"`
 	Since         time.Time `json:"since,omitzero"`           // when bootwatchd started: a change is a restart
 	DayBytesSince time.Time `json:"day_bytes_since,omitzero"` // when day_bytes started counting (bootwatchd v0.2.0 on)
+	// OmaBoot?'s bug reports (bootwatchd v0.2.2 on; zero before): kept and not kept since its
+	// start, and today's against the daily cap. For the bug report alerts (alert.go).
+	Bugs       int64 `json:"bugs"`
+	BugFailed  int64 `json:"bug_failed"`
+	BugsToday  int   `json:"bugs_today"`
+	BugsPerDay int   `json:"bugs_per_day"`
 }
 
 // Colour is a day bar's colour (and the headline mark's).

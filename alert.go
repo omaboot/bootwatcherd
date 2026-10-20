@@ -99,6 +99,52 @@ func blindStep(s alertState, r Result, at time.Time) (alertState, *message) {
 	return alertState{}, nil
 }
 
+// bugCapShare is how much of bootwatchd's daily bug report cap makes a push: far more than
+// testers send, so likely someone abusing the key a public image carries.
+const bugCapShare = 0.8
+
+// bugAlert is what the bug report alerts last saw of bootwatchd's counters (since its start).
+type bugAlert struct {
+	Since   time.Time `json:"since,omitzero"` // bootwatchd's start: a new one starts the counts again
+	Kept    int64     `json:"kept"`
+	Failed  int64     `json:"failed"`
+	Failing bool      `json:"failing"`           // a push said reports aren't kept
+	From    time.Time `json:"from,omitzero"`     // when the failures began
+	CapDay  string    `json:"cap_day,omitempty"` // the UTC day the near-cap push went out
+}
+
+// bugStep moves the bug report alerts on by one reading of bootwatchd's counters (nil: none,
+// nothing changes). It pushes when a report wasn't kept (once, until one is kept again), when
+// one is kept again after that, and once a day when today's reports reach bugCapShare of the
+// cap. The caller keeps the returned state only once the push went out, so an undelivered one is
+// tried again.
+func bugStep(s bugAlert, h *Health, at time.Time) (bugAlert, *message) {
+	if h == nil || h.BugsPerDay == 0 { // no answer, or a bootwatchd that takes no bug reports
+		return s, nil
+	}
+	if !h.Since.Equal(s.Since) { // a restart: its counters start at 0
+		s.Since, s.Kept, s.Failed = h.Since, 0, 0
+	}
+	newFailed, newKept := h.BugFailed-s.Failed, h.Bugs-s.Kept
+	s.Kept, s.Failed = h.Bugs, h.BugFailed
+	day := at.UTC().Format(time.DateOnly)
+	switch {
+	case newFailed > 0 && !s.Failing:
+		s.Failing, s.From = true, at
+		return s, &message{Down: true, Title: "boot.watch isn't keeping bug reports",
+			Body: fmt.Sprintf("%d not kept since %s UTC; bootwatchd's log says why (journalctl -u bootwatchd)", newFailed, hhmm(at))}
+	case s.Failing && newKept > 0 && newFailed == 0:
+		from := s.From
+		s.Failing, s.From = false, time.Time{}
+		return s, &message{Title: "boot.watch keeping bug reports again", Body: fmt.Sprintf("failing since %s UTC (%s)", hhmm(from), minutes(at.Sub(from)))}
+	case float64(h.BugsToday) >= bugCapShare*float64(h.BugsPerDay) && s.CapDay != day:
+		s.CapDay = day
+		return s, &message{Down: true, Title: "boot.watch: bug reports near today's cap",
+			Body: fmt.Sprintf("%d of %d today: far more than testers send, so maybe someone using a public image's upload key", h.BugsToday, h.BugsPerDay)}
+	}
+	return s, nil
+}
+
 // message is a push.
 type message struct {
 	Title, Body string

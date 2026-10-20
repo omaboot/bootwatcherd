@@ -527,3 +527,44 @@ func TestBlind(t *testing.T) {
 		t.Fatalf("pushes:\n%s\nwant:\n%s", strings.Join(pushes, "\n"), strings.Join(want, "\n"))
 	}
 }
+
+// Bug report alerts: one push when reports stop being kept, one when they're kept again, one a
+// day near the cap; a bootwatchd restart starts the counts again.
+func TestBugStep(t *testing.T) {
+	start := time.Date(2026, 10, 20, 5, 0, 0, 0, time.UTC)
+	h := &Health{Since: start, BugsPerDay: 500}
+	at := start.Add(time.Minute)
+	var s bugAlert
+	var m *message
+	next := func(kept, failed int64, today int) *message {
+		h.Bugs, h.BugFailed, h.BugsToday = kept, failed, today
+		at = at.Add(time.Minute)
+		s, m = bugStep(s, h, at)
+		return m
+	}
+	if next(2, 0, 2) != nil {
+		t.Fatal("kept ones push nothing")
+	}
+	if m := next(2, 1, 2); m == nil || !m.Down || !strings.Contains(m.Title, "isn't keeping") {
+		t.Fatalf("a failure: %+v", m)
+	}
+	if next(2, 3, 2) != nil {
+		t.Fatal("more failures push nothing more")
+	}
+	if m := next(3, 3, 3); m == nil || m.Down || !strings.Contains(m.Title, "again") {
+		t.Fatalf("kept again: %+v", m)
+	}
+	h.Since = at // a restart
+	if next(0, 0, 3) != nil {
+		t.Fatal("a restart pushes nothing")
+	}
+	if m := next(1, 0, 400); m == nil || !strings.Contains(m.Title, "near today's cap") {
+		t.Fatalf("near the cap: %+v", m)
+	}
+	if next(2, 0, 450) != nil {
+		t.Fatal("the near-cap push goes once a day")
+	}
+	if s, m := bugStep(bugAlert{}, &Health{Since: start}, at); m != nil || s.Since != (time.Time{}) {
+		t.Fatal("a bootwatchd without bug reports pushes nothing")
+	}
+}
