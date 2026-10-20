@@ -14,7 +14,7 @@
 boot.watch's monitor and status page, https://status.boot.watch. Every minute it checks
 bootwatchd the way an OmaBoot? Live Mac does, through boot.watch's public address (Cloudflare,
 the tunnel, bootwatchd), keeps 60 days of results in its own plain files, pushes an alert
-through Pushover when an endpoint stays down or it can't check, and serves the status page (the
+through Pushover when an endpoint stays down, it can't check, or OmaBoot?'s bug reports aren't kept, and serves the status page (the
 W1 design). Standard library only.
 
 ## A check
@@ -71,6 +71,11 @@ check. The state lives in `state.json`, so a restart doesn't repeat a push.
 When the control check fails 10 times in a row, the checker can't check: one push says so, and
 one when it can again. If the network itself was down and nothing could go out, one push
 afterwards says when it was blind. `-test-push` sends one push and exits; every deploy runs it.
+
+OmaBoot?'s bug reports, from bootwatchd's `/v1/health` (v0.2.2 on): one push when a report isn't
+kept (the store refused it; bootwatchd's log says why), one when one is kept again, and once a
+day when today's reports reach 80% of bootwatchd's daily cap, far more than testers send, so
+likely someone using the upload key a public image carries.
 
 ## Running
 

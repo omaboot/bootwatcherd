@@ -54,6 +54,7 @@ type dayAcc struct {
 type persisted struct {
 	Alerts      map[string]alertState `json:"alerts"`
 	Blind       alertState            `json:"blind"`                 // the checker's own run of no-data checks
+	Bugs        bugAlert              `json:"bugs"`                  // bootwatchd's bug reports, as last seen
 	WatchdSince time.Time             `json:"watchd_since,omitzero"` // bootwatchd's start, as last seen
 	Restarts    []time.Time           `json:"restarts,omitempty"`    // bootwatchd's restarts in the last 60 days
 }
@@ -374,6 +375,21 @@ func (s *store) alertStates() (map[string]alertState, alertState) {
 		m[e.Path] = s.state.Alerts[e.Path]
 	}
 	return m, s.state.Blind
+}
+
+// bugAlert is the bug report alerts' state.
+func (s *store) bugAlert() bugAlert {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.state.Bugs
+}
+
+// setBugAlert keeps the bug report alerts' state, writing state.json when it changed.
+func (s *store) setBugAlert(b bugAlert) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.state.Bugs = b
+	return s.persist()
 }
 
 // setAlertStates keeps the alert states, writing state.json when they changed.
